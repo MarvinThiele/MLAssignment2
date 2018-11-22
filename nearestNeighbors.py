@@ -3,6 +3,7 @@
 class kNearestNeighborsClassifier():
     dataframe = []
     k = 5
+    name = "K-Nearest-Neighbor"
 
     def __init__(self, dataframe):
         self.dataframe = dataframe
@@ -27,6 +28,16 @@ class kNearestNeighborsClassifier():
             return 1
         else:
             return 0
+
+    def classifyData(self, trainingData, testData):
+        self.dataframe = trainingData
+
+        results = []
+        for i, instance in enumerate(testData):
+            results.append(self.classifyInstance(instance))
+            print(i)
+
+        return results
 
 
 
