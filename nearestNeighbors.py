@@ -1,4 +1,5 @@
 # This file will implement a KNN (k-nearest-neighbor algorithm)
+from sklearn import neighbors
 
 class kNearestNeighborsClassifier():
     dataframe = []
@@ -29,7 +30,7 @@ class kNearestNeighborsClassifier():
         else:
             return 0
 
-    def classifyData(self, trainingData, testData):
+    def classifyData2(self, trainingData, testData):
         self.dataframe = trainingData
 
         results = []
@@ -38,6 +39,23 @@ class kNearestNeighborsClassifier():
             print(i)
 
         return results
+
+    def classifyData(self, trainingData, testData):
+        onlyFeaturesTrain = []
+        onlyClassTrain = []
+        for instance in trainingData:
+            onlyFeaturesTrain.append(instance[0:57])
+            onlyClassTrain.append(int(instance[57]))
+
+        onlyFeaturesTest = []
+        onlyClassTest = []
+        for instance in testData:
+            onlyFeaturesTest.append(instance[0:57])
+            onlyClassTest.append(int(instance[57]))
+
+        clf = neighbors.KNeighborsClassifier()
+        clf.fit(onlyFeaturesTrain, onlyClassTrain)
+        return clf.predict(onlyFeaturesTest)
 
 
 

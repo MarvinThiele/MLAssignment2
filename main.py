@@ -1,6 +1,9 @@
 from nearestNeighbors import kNearestNeighborsClassifier
 from naiveBayes import naivesBayesClassifier
+from decisionTree import decisionTreeClassifier
 import random
+import copy
+import math
 
 def main():
     df = []
@@ -23,7 +26,7 @@ def main():
             line_info['coeffvar'] = float(line[5])
             information[i] = line_info
 
-    knn = kNearestNeighborsClassifier(df)
+
 
     random.shuffle(df)
     border = int(len(df)*0.7)
@@ -31,9 +34,13 @@ def main():
     testData = df[border:]
 
     nb = naivesBayesClassifier()
-    #nb.classifyData(trainingData, testData)
+    dt = decisionTreeClassifier()
+    knn = kNearestNeighborsClassifier(df)
 
-    crossValidation(df, nb)
+    #dt.classifyData(trainingData, testData)
+    crossValidation(df, [nb, dt, knn])
+
+    #crossValidation(df, nb)
     #crossValidation(df, knn)
 
     #predicted = knn.classifyData(trainingData, testData)
@@ -48,9 +55,9 @@ def reportStatistics(testData, prediction):
         else:
             false += 1
     print("Accuracy: " + str((correct/len(testData))*100))
-    return (correct/len(testData))*100
+    return round(correct/len(testData), 4)
 
-def crossValidation(df, classifier):
+def crossValidation(df, classifiers):
     random.shuffle(df)
 
     # Create the 10 data packets
@@ -60,30 +67,74 @@ def crossValidation(df, classifier):
             dataParts.append(df[0:int(len(df) * 0.1)])
         else:
             dataParts.append(df[int(len(df) * (i/10)):int(len(df) * (i+1)/10)])
-        print(len(dataParts[i]))
 
     # Test the classifier 10 times
-    results = []
+    results = [[], [], []]
     for i in range(0, 10):
         testData = dataParts[i]
         trainingData = []
-
         for j in range(0, 10):
             if j != i:
                 trainingData.extend(dataParts[j])
             else:
                 continue
-        results.append(reportStatistics(testData, classifier.classifyData(trainingData, testData)))
+
+        for j, classifier in enumerate(classifiers):
+            results[j].append(reportStatistics(testData, classifier.classifyData(trainingData, testData)))
 
     # Average the results
-    sum = 0
-    for accuracy in results:
-        sum += accuracy
-    average = sum/len(results)
+    sums = [0,0,0]
+    averages = [0,0,0]
+    averagesStrings = ["", "", ""]
+    for i in range(0, 10):
+        for j in range(0, len(results)):
+            sums[j] += results[j][i]
+    for i, sum in enumerate(sums):
+        averages[i] = sum / 10
+        averagesStrings[i] = str(round(averages[i], 4))
+    for i, avgstring in enumerate(averagesStrings):
+        while len(avgstring) < 6:
+            avgstring += "0"
+        averagesStrings[i] = avgstring
 
-    print("The crossvalidated Accuracy "+classifier.name+" is: "+str(average))
+    # Standard Deviations
+    stdMean = copy.deepcopy(results)
+    for i in range(0, 10):
+        for j in range(0, len(results)):
+            stdMean[j][i] = pow(stdMean[j][i] - averages[j], 2)
+    sums = [0, 0, 0]
+    for i in range(0, 10):
+        for j in range(0, len(results)):
+            sums[j] += stdMean[j][i]
+    std = [0,0,0]
+    stdStrings = ["", "", ""]
+    for i, sum in enumerate(sums):
+        std[i] = math.sqrt(sum / 10)
+        stdStrings[i] = str(round(std[i], 4))
+    for i, stdstring in enumerate(stdStrings):
+        while len(stdstring) < 6:
+            stdstring += "0"
+            stdStrings[i] = stdstring
 
-
+    print("")
+    print("------------------------------------------------------------")
+    print(" Fold    Naive Bayes     Decision Tree    K-Nearest-Neighbor")
+    print("------------------------------------------------------------")
+    for i in range(0, 10):
+        line = "   "+str(i+1)
+        for j in range(0, len(results)):
+            number = str(results[j][i])
+            while len(number) < 6:
+                number += "0"
+            if i == 9 and j == 0:
+                line += "        "+number
+            else:
+                line += "         " + number
+        print(line)
+    print("------------------------------------------------------------")
+    print(" avg         " + str(averagesStrings[0])+"         " + str(averagesStrings[1]) + "         " + str(averagesStrings[2]))
+    print(" stdev       " + str(stdStrings[0]) + "         " + str(stdStrings[1]) + "         " + str(stdStrings[2]))
+    print("------------------------------------------------------------")
 
 if __name__ == "__main__":
     main()
