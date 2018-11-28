@@ -1,5 +1,6 @@
 from categoryEncoder import categoryEncoder
 import copy
+import time
 
 class naivesBayesClassifier:
     name = "Naive Bayes"
@@ -10,12 +11,15 @@ class naivesBayesClassifier:
     def classifyInstance(self, instance):
         raise NotImplementedError
 
-    def classifyData(self, trainingData, testData):
+    def classifyData(self, trainingData, testData, returnTrainingTime=False):
         encoder = categoryEncoder()
 
         # Transform the real-valued data into categorical data to be able to apply naive bayes
         trainingData = encoder.fitTransform(trainingData)
         testData = encoder.transform(testData)
+
+        if returnTrainingTime:
+            timeStart = time.time()
 
         # Calculate the Probabilties for the negative and posivie Class
         pPositive = 0
@@ -53,6 +57,10 @@ class naivesBayesClassifier:
             for j in range(0, 6):
                 probabilities[i][j][1] = probabilities[i][j][1] / sumPositve
                 probabilities[i][j][0] = probabilities[i][j][0] / sumNegative
+
+        if returnTrainingTime:
+            timeEnd = time.time()
+            return (timeEnd-timeStart)*1000
 
         # Predict each instance of the test dataset by multiplying the conditional probabilities calculated above
         prediction = []

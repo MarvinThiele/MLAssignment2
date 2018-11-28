@@ -1,5 +1,6 @@
 # This file will implement a KNN (k-nearest-neighbor algorithm)
 from sklearn import neighbors
+import time
 
 class kNearestNeighborsClassifier():
     dataframe = []
@@ -40,7 +41,7 @@ class kNearestNeighborsClassifier():
 
         return results
 
-    def classifyData(self, trainingData, testData):
+    def classifyData(self, trainingData, testData, returnTrainingTime=False):
         onlyFeaturesTrain = []
         onlyClassTrain = []
         for instance in trainingData:
@@ -53,8 +54,16 @@ class kNearestNeighborsClassifier():
             onlyFeaturesTest.append(instance[0:57])
             onlyClassTest.append(int(instance[57]))
 
+        if returnTrainingTime:
+            timeStart = time.time()
+
         clf = neighbors.KNeighborsClassifier()
         clf.fit(onlyFeaturesTrain, onlyClassTrain)
+
+        if returnTrainingTime:
+            timeEnd = time.time()
+            return (timeEnd-timeStart)*1000
+
         return clf.predict(onlyFeaturesTest)
 
 
