@@ -31,7 +31,7 @@ class kNearestNeighborsClassifier():
         else:
             return 0
 
-    def classifyData2(self, trainingData, testData):
+    def classifyDataSelfImplemented(self, trainingData, testData):
         self.dataframe = trainingData
 
         results = []

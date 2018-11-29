@@ -221,7 +221,6 @@ def friedmanTest(df, classifiers, measure):
                 ranks[0].append(2)
                 ranks[1].append(3)
                 ranks[2].append(1)
-            raise NotImplementedError
         if measure == "trainingTime":
             for j in range(0,3):
                 if ranks[j][i] == 1:
